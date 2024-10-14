@@ -83,7 +83,7 @@ Here is the planned command structure with brief descriptions.
 | ------- | ----------- |
 | todo list --complete | List completed tasks |
 | todo list --incomplete | Lists incomplete tasks |
-| todo clearn | Deletes all tasks |
+| todo clear | Deletes all tasks |
 
 ## Stack
 

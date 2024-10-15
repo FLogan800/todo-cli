@@ -1,4 +1,5 @@
 use clap::{Parser, Subcommand};
+use serde::{Serialize, Deserialize};
 
 // Command line Parser Configuration
 #[derive(Parser)]
@@ -27,7 +28,8 @@ enum Commands {
     Delete,
 }
 
-struct _Task {
+#[derive(Serialize, Deserialize, Debug)]
+struct Task {
     id: u32,
     title: String,
     description: Option<String>,
@@ -37,11 +39,28 @@ struct _Task {
 fn main() {
     let cli = Cli::parse();
 
+    let mut task_list: Vec<Task> = vec![];
+
     match &cli.command {
         Commands::New { title, description } => {
-            println!("title: {:?}", title);
-            println!("description: {:?}", description);
+            new_task(&mut task_list, title.clone(), description.clone());
+            for task in task_list {
+                println!("{:?}", task);
+            }
         },
-        _ => println!("Not yet"),
+        _ => println!("Not implemented yet"),
     }
+}
+
+fn new_task(task_list: &mut Vec<Task>, title: String, description: Option<String>) {
+    let task_id = if task_list.len() == 0 { 1 } else { task_list[task_list.len() - 1].id + 1 };
+
+    let task = Task {
+        id: task_id,
+        title: title.clone(),
+        description: description,
+        complete: false,
+    };
+
+    task_list.push(task);
 }

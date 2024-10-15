@@ -71,7 +71,7 @@ Here is the planned command structure with brief descriptions.
 
 | Command | Description |
 | ------- | ----------- |
-| todo add "Description" | Adds a new task with the given description |
+| todo new "Description" | Create a new task with the given description |
 | todo list | List all tasks |
 | todo complete <task_id> | Mark a task as complete |
 | todo delete <task_id> | Remove a task from the list |
@@ -97,7 +97,7 @@ Here is the planned command structure with brief descriptions.
 ## Functionality Outline
 
 ```Rust
-add_task(description: String) -> Task
+new_task(description: String) -> Task
 ```
 
 - Creates a new `Task` with a unique ID and adds it to the task list

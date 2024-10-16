@@ -32,7 +32,7 @@ enum Commands {
     Delete,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize)]
 struct Task {
     id: u32,
     title: String,
@@ -60,6 +60,9 @@ fn main() {
 
             serde_json::to_writer_pretty(task_file, &task_list).expect("Failed to write to file");  
         },
+        Commands::List => {
+            list_tasks(&task_list);
+        },
         _ => println!("Not implemented yet"),
     }
 }
@@ -75,4 +78,13 @@ fn new_task(task_list: &mut Vec<Task>, title: String, description: Option<String
     };
 
     task_list.push(task);
+}
+
+fn list_tasks(task_list: &Vec<Task>) {
+    for task in task_list {
+        println!("Task ID: {}", task.id);
+        println!("Task: {}", task.title);
+        println!("Description: {}", task.description.as_deref().unwrap_or_default());
+        println!("Complete: {}\n", task.complete);
+    }
 }

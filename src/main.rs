@@ -29,7 +29,7 @@ enum Commands {
     Complete { id: u32 },
 
     /// Delete a task
-    Delete,
+    Delete { id: u32 },
 }
 
 #[derive(Serialize, Deserialize)]
@@ -57,7 +57,7 @@ fn main() {
         }
         Commands::List => list_tasks(&task_list),
         Commands::Complete { id } => mark_complete(&mut task_list, *id),
-        _ => println!("Not implemented yet"),
+        Commands::Delete { id } => delete_task(&mut task_list, *id),
     }
 
     let task_file = File::create(TASKS_FILE_PATH).expect("Failed to open tasks file");
@@ -103,6 +103,19 @@ fn mark_complete(task_list: &mut Vec<Task>, id: u32) {
     for task in task_list {
         if task.id == id {
             task.complete = true;
+            return;
+        }
+    }
+
+    println!("A task with the given ID does not exist");
+}
+
+fn delete_task(task_list: &mut Vec<Task>, id: u32) {
+    for index in 0..task_list.len() {
+        let task = &task_list[index];
+
+        if task.id == id {
+            task_list.remove(index);
             return;
         }
     }

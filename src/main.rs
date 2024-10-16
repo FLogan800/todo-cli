@@ -56,7 +56,7 @@ fn main() {
             new_task(&mut task_list, title.clone(), description.clone())
         }
         Commands::List => list_tasks(&task_list),
-        Commands::Complete { id } => mark_complete(&mut task_list, *id),
+        Commands::Complete { id } => mark_task_complete(&mut task_list, *id),
         Commands::Delete { id } => delete_task(&mut task_list, *id),
     }
 
@@ -99,7 +99,7 @@ fn list_tasks(task_list: &Vec<Task>) {
     }
 }
 
-fn mark_complete(task_list: &mut Vec<Task>, id: u32) {
+fn mark_task_complete(task_list: &mut Vec<Task>, id: u32) {
     for task in task_list {
         if task.id == id {
             task.complete = true;

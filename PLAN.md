@@ -16,7 +16,7 @@ Users will be able to add and delete tasks, mark tasks complete, as well as save
 ### Core Features
 
 - Add tasks
-  - Add a new task to the list with a description and unique ID
+  - Add a new task to the list with a title, description, and unique ID
 - List tasks
   - Display a list of all the tasks to the command line
 - Mark as complete
@@ -45,12 +45,14 @@ Each task will be represented by the following struct:
 ```Rust
 struct Task {
   id: u32,
-  description: String,
+  title: String
+  description: Option<String>,
   complete: bool,
 }
 ```
 
 - id: Unique identifire for each task
+- title: The title of the task
 - description: The task's text description
 - complete: The completion status of the task
 
@@ -71,7 +73,7 @@ Here is the planned command structure with brief descriptions.
 
 | Command | Description |
 | ------- | ----------- |
-| todo new "Description" | Create a new task with the given description |
+| todo new \<title\> [description] | Create a new task with the given description |
 | todo list | List all tasks |
 | todo complete <task_id> | Mark a task as complete |
 | todo delete <task_id> | Remove a task from the list |
@@ -119,18 +121,6 @@ delete_task(id: u32) -> Result<(), String>
 ```
 
 - Finds a task by ID and removes it from `task_list`
-
-```Rust
-save_tasks(task_list: Vec<Task>) Result<(), String>
-```
-
-- Serializes `task_list` and saves it to a JSON file
-
-```Rust
-load_tasks() -> Result<Vec<Task>, std::io::Error>
-```
-
-- Reads the JSON file and returns `task_list`
 
 ## Main Function Flow
 

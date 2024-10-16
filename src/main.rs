@@ -1,5 +1,9 @@
 use clap::{Parser, Subcommand};
 use serde::{Serialize, Deserialize};
+use std::fs::File;
+use std::path::Path;
+
+const TASKS_FILE_PATH: &str = "tasks.json";
 
 // Command line Parser Configuration
 #[derive(Parser)]
@@ -39,14 +43,22 @@ struct Task {
 fn main() {
     let cli = Cli::parse();
 
-    let mut task_list: Vec<Task> = vec![];
+    let mut task_list: Vec<Task> = if Path::new(TASKS_FILE_PATH).exists() {
+        let tasks_file = File::open(TASKS_FILE_PATH).expect("Failed to open file");
+
+        serde_json::from_reader(tasks_file).expect("Failed to extract tasks from file")
+    }
+    else {
+        Vec::<Task>::new()
+    };
 
     match &cli.command {
         Commands::New { title, description } => {
             new_task(&mut task_list, title.clone(), description.clone());
-            for task in task_list {
-                println!("{:?}", task);
-            }
+
+            let task_file = File::create(TASKS_FILE_PATH).expect("Failed to open tasks file");
+
+            serde_json::to_writer_pretty(task_file, &task_list).expect("Failed to write to file");  
         },
         _ => println!("Not implemented yet"),
     }

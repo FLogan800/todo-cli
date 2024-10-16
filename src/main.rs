@@ -22,8 +22,17 @@ enum Commands {
         description: Option<String>,
     },
 
-    /// List all tasks
-    List,
+    /// List tasks, only incomplete by default
+    #[group(multiple = false)]
+    List {
+        #[arg(short, long)]
+        /// List all tasks, including completed
+        all: bool,
+
+        #[arg(short, long)]
+        /// List only complete tasks
+        complete: bool,
+    },
 
     /// Mark a task as complete
     Complete { id: u32 },
@@ -55,7 +64,7 @@ fn main() {
         Commands::New { title, description } => {
             new_task(&mut task_list, title.clone(), description.clone())
         }
-        Commands::List => list_tasks(&task_list),
+        Commands::List { all, complete } => list_tasks(&task_list, *all, *complete),
         Commands::Complete { id } => mark_task_complete(&mut task_list, *id),
         Commands::Delete { id } => delete_task(&mut task_list, *id),
     }
@@ -82,20 +91,22 @@ fn new_task(task_list: &mut Vec<Task>, title: String, description: Option<String
     task_list.push(task);
 }
 
-fn list_tasks(task_list: &Vec<Task>) {
+fn list_tasks(task_list: &Vec<Task>, list_all: bool, list_complete: bool) {
     if task_list.len() == 0 {
         println!("There are no tasks to display");
         return;
     }
 
     for task in task_list {
-        println!("Task ID: {}", task.id);
-        println!("Task: {}", task.title);
-        println!(
-            "Description: {}",
-            task.description.as_deref().unwrap_or_default()
-        );
-        println!("Complete: {}\n", task.complete);
+        if list_all || task.complete == list_complete {
+            println!("Task ID: {}", task.id);
+            println!("Task: {}", task.title);
+            println!(
+                "Description: {}",
+                task.description.as_deref().unwrap_or_default()
+            );
+            println!("Complete: {}\n", task.complete);
+        }
     }
 }
 

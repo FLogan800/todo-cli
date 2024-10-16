@@ -81,6 +81,11 @@ fn new_task(task_list: &mut Vec<Task>, title: String, description: Option<String
 }
 
 fn list_tasks(task_list: &Vec<Task>) {
+    if task_list.len() == 0 {
+        println!("There are no tasks to display");
+        return;
+    }
+
     for task in task_list {
         println!("Task ID: {}", task.id);
         println!("Task: {}", task.title);

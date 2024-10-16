@@ -1,5 +1,5 @@
 use clap::{Parser, Subcommand};
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 use std::fs::File;
 use std::path::Path;
 
@@ -26,7 +26,7 @@ enum Commands {
     List,
 
     /// Mark a task as complete
-    Complete,
+    Complete { id: u32 },
 
     /// Delete a task
     Delete,
@@ -47,28 +47,30 @@ fn main() {
         let tasks_file = File::open(TASKS_FILE_PATH).expect("Failed to open file");
 
         serde_json::from_reader(tasks_file).expect("Failed to extract tasks from file")
-    }
-    else {
+    } else {
         Vec::<Task>::new()
     };
 
     match &cli.command {
         Commands::New { title, description } => {
-            new_task(&mut task_list, title.clone(), description.clone());
-
-            let task_file = File::create(TASKS_FILE_PATH).expect("Failed to open tasks file");
-
-            serde_json::to_writer_pretty(task_file, &task_list).expect("Failed to write to file");  
-        },
-        Commands::List => {
-            list_tasks(&task_list);
-        },
+            new_task(&mut task_list, title.clone(), description.clone())
+        }
+        Commands::List => list_tasks(&task_list),
+        Commands::Complete { id } => mark_complete(&mut task_list, *id),
         _ => println!("Not implemented yet"),
     }
+
+    let task_file = File::create(TASKS_FILE_PATH).expect("Failed to open tasks file");
+
+    serde_json::to_writer_pretty(task_file, &task_list).expect("Failed to write to file");
 }
 
 fn new_task(task_list: &mut Vec<Task>, title: String, description: Option<String>) {
-    let task_id = if task_list.len() == 0 { 1 } else { task_list[task_list.len() - 1].id + 1 };
+    let task_id = if task_list.len() == 0 {
+        1
+    } else {
+        task_list[task_list.len() - 1].id + 1
+    };
 
     let task = Task {
         id: task_id,
@@ -89,7 +91,21 @@ fn list_tasks(task_list: &Vec<Task>) {
     for task in task_list {
         println!("Task ID: {}", task.id);
         println!("Task: {}", task.title);
-        println!("Description: {}", task.description.as_deref().unwrap_or_default());
+        println!(
+            "Description: {}",
+            task.description.as_deref().unwrap_or_default()
+        );
         println!("Complete: {}\n", task.complete);
     }
+}
+
+fn mark_complete(task_list: &mut Vec<Task>, id: u32) {
+    for task in task_list {
+        if task.id == id {
+            task.complete = true;
+            return;
+        }
+    }
+
+    println!("A task with the given ID does not exist");
 }

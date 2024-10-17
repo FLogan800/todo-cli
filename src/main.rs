@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 use std::fs::File;
 use std::path::Path;
 
-const TASKS_FILE_PATH: &str = "tasks.json";
+const TASKS_FILE_PATH: &str = "./tasks.json";
 
 // Command line Parser Configuration
 #[derive(Parser)]
@@ -25,12 +25,12 @@ enum Commands {
     /// List tasks, only incomplete by default
     #[group(multiple = false)]
     List {
-        #[arg(short, long)]
         /// List all tasks, including completed
+        #[arg(short, long)]
         all: bool,
 
+        /// List only completed tasks
         #[arg(short, long)]
-        /// List only complete tasks
         complete: bool,
     },
 

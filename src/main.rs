@@ -39,6 +39,8 @@ enum Commands {
 
     /// Delete a task
     Delete { id: u32 },
+
+    Clear,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -67,6 +69,7 @@ fn main() {
         Commands::List { all, complete } => list_tasks(&task_list, *all, *complete),
         Commands::Complete { id } => mark_task_complete(&mut task_list, *id),
         Commands::Delete { id } => delete_task(&mut task_list, *id),
+        Commands::Clear => clear_tasks(&mut task_list),
     }
 
     let task_file = File::create(TASKS_FILE_PATH).expect("Failed to open tasks file");
@@ -132,4 +135,8 @@ fn delete_task(task_list: &mut Vec<Task>, id: u32) {
     }
 
     println!("A task with the given ID does not exist");
+}
+
+fn clear_tasks(task_list: &mut Vec<Task>) {
+    *task_list = Vec::<Task>::new();
 }

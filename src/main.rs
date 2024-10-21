@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 use std::fs::File;
 use std::path::Path;
 
-const TASKS_FILE_PATH: &str = "./tasks.json";
+const TASKS_FILE_PATH: &str = "tasks.json";
 
 // Command line Parser Configuration
 #[derive(Parser)]

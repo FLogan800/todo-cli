@@ -49,6 +49,7 @@ enum Commands {
         id: u32,
     },
 
+    /// Delete all tasks
     Clear,
 }
 

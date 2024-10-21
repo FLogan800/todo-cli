@@ -45,7 +45,8 @@ Each task will be represented by the following struct:
 ```Rust
 struct Task {
   id: u32,
-  title: String
+  title: String,
+  class: Option<String>,
   description: Option<String>,
   complete: bool,
 }
@@ -73,7 +74,7 @@ Here is the planned command structure with brief descriptions.
 
 | Command | Description |
 | ------- | ----------- |
-| todo new \<title\> [description] | Create a new task with the given description |
+| todo new \<title\> [description] [class] | Create a new task with the given description |
 | todo list | List all tasks |
 | todo complete <task_id> | Mark a task as complete |
 | todo delete <task_id> | Remove a task from the list |
@@ -84,7 +85,7 @@ Here is the planned command structure with brief descriptions.
 | Command | Description |
 | ------- | ----------- |
 | todo list --complete | List completed tasks |
-| todo list --incomplete | Lists incomplete tasks |
+| todo list --all | List all tasks |
 | todo clear | Deletes all tasks |
 
 ## Stack

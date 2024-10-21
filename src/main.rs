@@ -19,7 +19,12 @@ enum Commands {
     /// Create a new task
     New {
         title: String,
+
+        #[arg(short, long)]
         description: Option<String>,
+
+        #[arg(short, long)]
+        class: Option<String>,
     },
 
     /// List tasks, only incomplete by default
@@ -35,10 +40,14 @@ enum Commands {
     },
 
     /// Mark a task as complete
-    Complete { id: u32 },
+    Complete {
+        id: u32,
+    },
 
     /// Delete a task
-    Delete { id: u32 },
+    Delete {
+        id: u32,
+    },
 
     Clear,
 }
@@ -48,6 +57,7 @@ struct Task {
     id: u32,
     title: String,
     description: Option<String>,
+    class: Option<String>,
     complete: bool,
 }
 
@@ -63,21 +73,28 @@ fn main() {
     };
 
     match &cli.command {
-        Commands::New { title, description } => {
-            new_task(&mut task_list, title.clone(), description.clone())
-        }
+        Commands::New {
+            title,
+            description,
+            class,
+        } => new_task(&mut task_list, title, description, class),
         Commands::List { all, complete } => list_tasks(&task_list, *all, *complete),
         Commands::Complete { id } => mark_task_complete(&mut task_list, *id),
         Commands::Delete { id } => delete_task(&mut task_list, *id),
         Commands::Clear => clear_tasks(&mut task_list),
     }
 
-    let task_file = File::create(TASKS_FILE_PATH).expect("Failed to open tasks file");
+    let task_file: File = File::create(TASKS_FILE_PATH).expect("Failed to open tasks file");
 
     serde_json::to_writer_pretty(task_file, &task_list).expect("Failed to write to file");
 }
 
-fn new_task(task_list: &mut Vec<Task>, title: String, description: Option<String>) {
+fn new_task(
+    task_list: &mut Vec<Task>,
+    title: &str,
+    description: &Option<String>,
+    class: &Option<String>,
+) {
     let task_id = if task_list.len() == 0 {
         1
     } else {
@@ -86,8 +103,9 @@ fn new_task(task_list: &mut Vec<Task>, title: String, description: Option<String
 
     let task = Task {
         id: task_id,
-        title: title.clone(),
-        description: description,
+        title: title.to_string(),
+        description: description.clone(),
+        class: class.clone(),
         complete: false,
     };
 
@@ -104,10 +122,15 @@ fn list_tasks(task_list: &Vec<Task>, list_all: bool, list_complete: bool) {
         if list_all || task.complete == list_complete {
             println!("Task ID: {}", task.id);
             println!("Task: {}", task.title);
-            println!(
-                "Description: {}",
-                task.description.as_deref().unwrap_or_default()
-            );
+            if task.class != None {
+                println!("Class: {}", task.class.as_deref().unwrap_or_default());
+            }
+            if task.description != None {
+                println!(
+                    "Description: {}",
+                    task.description.as_deref().unwrap()
+                );
+            }
             println!("Complete: {}\n", task.complete);
         }
     }

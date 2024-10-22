@@ -1,9 +1,8 @@
 use clap::{Parser, Subcommand};
+use dirs::home_dir;
 use serde::{Deserialize, Serialize};
 use std::fs::File;
 use std::path::Path;
-
-const TASKS_FILE_PATH: &str = "tasks.json";
 
 // Command line Parser Configuration
 #[derive(Parser)]
@@ -40,14 +39,10 @@ enum Commands {
     },
 
     /// Mark a task as complete
-    Complete {
-        id: u32,
-    },
+    Complete { id: u32 },
 
     /// Delete a task
-    Delete {
-        id: u32,
-    },
+    Delete { id: u32 },
 
     /// Delete all tasks
     Clear,
@@ -63,10 +58,14 @@ struct Task {
 }
 
 fn main() {
+    let mut tasks_file_path = home_dir().expect("Failed to find home directory");
+
+    tasks_file_path.push("tasks.json");
+
     let cli = Cli::parse();
 
-    let mut task_list: Vec<Task> = if Path::new(TASKS_FILE_PATH).exists() {
-        let tasks_file = File::open(TASKS_FILE_PATH).expect("Failed to open file");
+    let mut task_list: Vec<Task> = if Path::new(&tasks_file_path).exists() {
+        let tasks_file = File::open(&tasks_file_path).expect("Failed to open file");
 
         serde_json::from_reader(tasks_file).expect("Failed to extract tasks from file")
     } else {
@@ -85,7 +84,7 @@ fn main() {
         Commands::Clear => clear_tasks(&mut task_list),
     }
 
-    let task_file: File = File::create(TASKS_FILE_PATH).expect("Failed to open tasks file");
+    let task_file: File = File::create(&tasks_file_path).expect("Failed to open tasks file");
 
     serde_json::to_writer_pretty(task_file, &task_list).expect("Failed to write to file");
 }
@@ -127,10 +126,7 @@ fn list_tasks(task_list: &Vec<Task>, list_all: bool, list_complete: bool) {
                 println!("Class: {}", task.class.as_deref().unwrap_or_default());
             }
             if task.description != None {
-                println!(
-                    "Description: {}",
-                    task.description.as_deref().unwrap()
-                );
+                println!("Description: {}", task.description.as_deref().unwrap());
             }
             println!("Complete: {}\n", task.complete);
         }

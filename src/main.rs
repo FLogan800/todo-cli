@@ -95,7 +95,7 @@ fn new_task(
     description: &Option<String>,
     class: &Option<String>,
 ) {
-    let task_id = if task_list.len() == 0 {
+    let task_id = if task_list.is_empty() {
         1
     } else {
         task_list[task_list.len() - 1].id + 1
@@ -113,7 +113,7 @@ fn new_task(
 }
 
 fn list_tasks(task_list: &Vec<Task>, list_all: bool, list_complete: bool) {
-    if task_list.len() == 0 {
+    if task_list.is_empty() {
         println!("There are no tasks to display");
         return;
     }
@@ -122,10 +122,10 @@ fn list_tasks(task_list: &Vec<Task>, list_all: bool, list_complete: bool) {
         if list_all || task.complete == list_complete {
             println!("Task ID: {}", task.id);
             println!("Task: {}", task.title);
-            if task.class != None {
+            if task.class.is_some() {
                 println!("Class: {}", task.class.as_deref().unwrap_or_default());
             }
-            if task.description != None {
+            if task.description.is_some() {
                 println!("Description: {}", task.description.as_deref().unwrap());
             }
             println!("Complete: {}\n", task.complete);

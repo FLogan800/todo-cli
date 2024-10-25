@@ -2,7 +2,10 @@ use clap::{Parser, Subcommand};
 use dirs::home_dir;
 use serde::{Deserialize, Serialize};
 use std::fs::File;
-use std::path::Path;
+use std::io;
+use std::path::{Path, PathBuf};
+
+const TASKS_FILE_NAME: &str = "tasks.json";
 
 // Command line Parser Configuration
 #[derive(Parser)]
@@ -58,19 +61,11 @@ struct Task {
 }
 
 fn main() {
-    let mut tasks_file_path = home_dir().expect("Failed to find home directory");
+    let tasks_file_path = get_tasks_file_path().expect("Failed to get task file path");
 
-    tasks_file_path.push("tasks.json");
-
+    let mut task_list = load_tasks(&tasks_file_path);
+    
     let cli = Cli::parse();
-
-    let mut task_list: Vec<Task> = if Path::new(&tasks_file_path).exists() {
-        let tasks_file = File::open(&tasks_file_path).expect("Failed to open file");
-
-        serde_json::from_reader(tasks_file).expect("Failed to extract tasks from file")
-    } else {
-        Vec::<Task>::new()
-    };
 
     match &cli.command {
         Commands::New {
@@ -84,7 +79,27 @@ fn main() {
         Commands::Clear => clear_tasks(&mut task_list),
     }
 
-    let task_file: File = File::create(&tasks_file_path).expect("Failed to open tasks file");
+    save_tasks(&task_list, &tasks_file_path);
+}
+
+fn get_tasks_file_path() -> io::Result<PathBuf> {
+    let mut tasks_file_path = home_dir().ok_or(io::Error::new(io::ErrorKind::NotFound, "Home directory not found"))?;
+    tasks_file_path.push(TASKS_FILE_NAME);
+    Ok(tasks_file_path)
+}
+
+fn load_tasks(tasks_file_path: &PathBuf) -> Vec<Task> {
+    if Path::new(tasks_file_path).exists() {
+        let tasks_file = File::open(tasks_file_path).expect("Failed to open file");
+
+        serde_json::from_reader(tasks_file).expect("Failed to extract tasks from file")
+    } else {
+        Vec::<Task>::new()
+    }
+}
+
+fn save_tasks(task_list: &Vec<Task>, tasks_file_path: &PathBuf) {
+    let task_file: File = File::create(tasks_file_path).expect("Failed to open tasks file");
 
     serde_json::to_writer_pretty(task_file, &task_list).expect("Failed to write to file");
 }

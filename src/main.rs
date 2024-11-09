@@ -20,6 +20,7 @@ struct Cli {
 enum Commands {
     /// Create a new task
     New {
+        #[arg(display_order = 0)]
         title: String,
 
         #[arg(short, long)]
@@ -27,6 +28,9 @@ enum Commands {
 
         #[arg(short, long)]
         class: Option<String>,
+
+        #[arg(short = 'u', long)]
+        due_date: Option<String>,
     },
 
     /// List tasks, only incomplete by default
@@ -57,6 +61,7 @@ struct Task {
     title: String,
     description: Option<String>,
     class: Option<String>,
+    due_date: Option<String>,
     complete: bool,
 }
 
@@ -72,7 +77,8 @@ fn main() {
             title,
             description,
             class,
-        } => new_task(&mut task_list, title, description, class),
+            due_date,
+        } => new_task(&mut task_list, title, description, class, due_date),
         Commands::List { all, complete } => list_tasks(&task_list, *all, *complete),
         Commands::Complete { id } => mark_task_complete(&mut task_list, *id),
         Commands::Delete { id } => delete_task(&mut task_list, *id),
@@ -109,6 +115,7 @@ fn new_task(
     title: &str,
     description: &Option<String>,
     class: &Option<String>,
+    due_date: &Option<String>,
 ) {
     let task_id = if task_list.is_empty() {
         1
@@ -121,6 +128,7 @@ fn new_task(
         title: title.to_string(),
         description: description.clone(),
         class: class.clone(),
+        due_date: due_date.clone(),
         complete: false,
     };
 
@@ -141,7 +149,10 @@ fn list_tasks(task_list: &Vec<Task>, list_all: bool, list_complete: bool) {
                 println!("Class: {}", task.class.as_deref().unwrap_or_default());
             }
             if task.description.is_some() {
-                println!("Description: {}", task.description.as_deref().unwrap());
+                println!("Description: {}", task.description.as_deref().unwrap_or_default());
+            }
+            if task.due_date.is_some() {
+                println!("Due Date: {}", task.due_date.as_deref().unwrap_or_default())
             }
             println!("Complete: {}\n", task.complete);
         }

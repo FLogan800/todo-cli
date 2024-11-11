@@ -33,6 +33,23 @@ enum Commands {
         due_date: Option<String>,
     },
 
+    /// Edit a task by ID
+    Edit {
+        id: u32,
+
+        #[arg(short, long)]
+        title: Option<String>,
+
+        #[arg(short, long)]
+        description: Option<String>,
+
+        #[arg(short, long)]
+        class: Option<String>,
+
+        #[arg(short = 'u', long)]
+        due_date: Option<String>,
+    },
+
     /// List tasks, only incomplete by default
     #[group(multiple = false)]
     List {
@@ -69,7 +86,7 @@ fn main() {
     let tasks_file_path = get_tasks_file_path().expect("Failed to get task file path");
 
     let mut task_list = load_tasks(&tasks_file_path);
-    
+
     let cli = Cli::parse();
 
     match &cli.command {
@@ -79,6 +96,13 @@ fn main() {
             class,
             due_date,
         } => new_task(&mut task_list, title, description, class, due_date),
+        Commands::Edit {
+            id,
+            title,
+            description,
+            class,
+            due_date,
+        } => edit_task(&mut task_list, *id, title, description, class, due_date),
         Commands::List { all, complete } => list_tasks(&task_list, *all, *complete),
         Commands::Complete { id } => mark_task_complete(&mut task_list, *id),
         Commands::Delete { id } => delete_task(&mut task_list, *id),
@@ -89,7 +113,10 @@ fn main() {
 }
 
 fn get_tasks_file_path() -> io::Result<PathBuf> {
-    let mut tasks_file_path = home_dir().ok_or(io::Error::new(io::ErrorKind::NotFound, "Home directory not found"))?;
+    let mut tasks_file_path = home_dir().ok_or(io::Error::new(
+        io::ErrorKind::NotFound,
+        "Home directory not found",
+    ))?;
     tasks_file_path.push(TASKS_FILE_NAME);
     Ok(tasks_file_path)
 }
@@ -135,6 +162,44 @@ fn new_task(
     task_list.push(task);
 }
 
+fn edit_task(
+    task_list: &mut Vec<Task>,
+    id: u32,
+    title: &Option<String>,
+    description: &Option<String>,
+    class: &Option<String>,
+    due_date: &Option<String>,
+) {
+    // Initialize `task` as a mutable reference wrapped in an Option
+    let mut task: Option<&mut Task> = None;
+
+    for item in task_list {
+        if item.id == id {
+            task = Some(item);
+            break;
+        }
+    }
+
+    // Check if `task` was found
+    if let Some(task) = task {
+        // Only update fields if `Option`s contain values
+        if title.is_some() {
+            task.title = title.clone().unwrap_or_default();
+        }
+        if description.is_some() {
+            task.description = description.clone();
+        }
+        if class.is_some() {
+            task.class = class.clone();
+        }
+        if due_date.is_some() {
+            task.due_date = due_date.clone();
+        }
+    } else {
+        println!("Task with ID {} not found.", id);
+    }
+}
+
 fn list_tasks(task_list: &Vec<Task>, list_all: bool, list_complete: bool) {
     if task_list.is_empty() {
         println!("There are no tasks to display");
@@ -149,7 +214,10 @@ fn list_tasks(task_list: &Vec<Task>, list_all: bool, list_complete: bool) {
                 println!("Class: {}", task.class.as_deref().unwrap_or_default());
             }
             if task.description.is_some() {
-                println!("Description: {}", task.description.as_deref().unwrap_or_default());
+                println!(
+                    "Description: {}",
+                    task.description.as_deref().unwrap_or_default()
+                );
             }
             if task.due_date.is_some() {
                 println!("Due Date: {}", task.due_date.as_deref().unwrap_or_default())
